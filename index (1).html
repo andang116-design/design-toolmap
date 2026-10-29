@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Design Toolmap</title>
+  <meta name="description" content="A desk of 2D graphic design tools, organised by the stages of a design workflow.">
+  <meta name="theme-color" content="#0d0d0d">
+
+  <!-- Marks the page as "JavaScript is on" so the intro only shows when it can work. -->
+  <script>document.documentElement.classList.add("js");</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Shared SVG ingredients. Nothing here is visible by itself. -->
+  <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- Soft contact shadow under every object -->
+      <radialGradient id="shadow">
+        <stop offset="0" stop-color="#000" stop-opacity=".30"/>
+        <stop offset=".6" stop-color="#000" stop-opacity=".12"/>
+        <stop offset="1" stop-color="#000" stop-opacity="0"/>
+      </radialGradient>
+
+      <!--
+        The "clay" look, in five steps:
+        1. wobble: nudge the outline so shapes look hand-moulded, not vector-perfect
+        2. height: blur the shape so its edges slope like a puffy lump
+        3. light: shade those slopes with a soft light from the top left
+        4. shine: add a faint highlight where the clay catches the light
+        5. grain: speckle the surface slightly, like fingertips pressed into clay
+      -->
+      <filter id="clay" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="4" result="wobble"/>
+        <feDisplacementMap in="SourceGraphic" in2="wobble" scale="9" xChannelSelector="R" yChannelSelector="G" result="shape"/>
+
+        <feGaussianBlur in="shape" stdDeviation="5.5" result="height"/>
+
+        <feDiffuseLighting in="height" surfaceScale="7" diffuseConstant="1.22" lighting-color="#ffffff" result="diffuse">
+          <feDistantLight azimuth="225" elevation="58"/>
+        </feDiffuseLighting>
+        <feComposite in="diffuse" in2="shape" operator="in" result="diffuseMasked"/>
+        <feBlend in="shape" in2="diffuseMasked" mode="multiply" result="shaded"/>
+
+        <feSpecularLighting in="height" surfaceScale="7" specularConstant=".55" specularExponent="16" lighting-color="#ffffff" result="spec">
+          <feDistantLight azimuth="225" elevation="52"/>
+        </feSpecularLighting>
+        <feComposite in="spec" in2="shape" operator="in" result="specMasked"/>
+        <feComposite in="shaded" in2="specMasked" operator="arithmetic" k1="0" k2="1" k3=".5" k4="0" result="lit"/>
+
+        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="9" result="grain"/>
+        <feColorMatrix in="grain" type="matrix" values="0.10 0 0 0 0.90  0.10 0 0 0 0.90  0.10 0 0 0 0.90  0 0 0 0 1" result="grainGray"/>
+        <feBlend in="lit" in2="grainGray" mode="multiply" result="grained"/>
+        <feComposite in="grained" in2="shape" operator="in"/>
+      </filter>
+
+      <!-- Same clay, for big flat objects: a gentler wobble so long edges don't look torn -->
+      <filter id="clay-big" x="-10%" y="-20%" width="120%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="1" seed="2" result="wobble"/>
+        <feDisplacementMap in="SourceGraphic" in2="wobble" scale="12" xChannelSelector="R" yChannelSelector="G" result="shape"/>
+        <feGaussianBlur in="shape" stdDeviation="7" result="height"/>
+        <feDiffuseLighting in="height" surfaceScale="8" diffuseConstant="1.22" lighting-color="#ffffff" result="diffuse">
+          <feDistantLight azimuth="225" elevation="58"/>
+        </feDiffuseLighting>
+        <feComposite in="diffuse" in2="shape" operator="in" result="diffuseMasked"/>
+        <feBlend in="shape" in2="diffuseMasked" mode="multiply" result="shaded"/>
+        <feSpecularLighting in="height" surfaceScale="8" specularConstant=".55" specularExponent="16" lighting-color="#ffffff" result="spec">
+          <feDistantLight azimuth="225" elevation="52"/>
+        </feSpecularLighting>
+        <feComposite in="spec" in2="shape" operator="in" result="specMasked"/>
+        <feComposite in="shaded" in2="specMasked" operator="arithmetic" k1="0" k2="1" k3=".5" k4="0" result="lit"/>
+        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="9" result="grain"/>
+        <feColorMatrix in="grain" type="matrix" values="0.10 0 0 0 0.90  0.10 0 0 0 0.90  0.10 0 0 0 0.90  0 0 0 0 1" result="grainGray"/>
+        <feBlend in="lit" in2="grainGray" mode="multiply" result="grained"/>
+        <feComposite in="grained" in2="shape" operator="in"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- ===== Intro: the room starts dark ===== -->
+  <section class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+    <h2 class="intro-title" id="intro-title">Let&rsquo;s design together.</h2>
+    <div class="intro-actions">
+      <button class="btn btn-yes" type="button" id="yes">Yes</button>
+      <button class="btn btn-red" type="button" id="yes-red">Yes (but in red)</button>
+    </div>
+  </section>
+
+  <!-- ===== The desk ===== -->
+  <main class="scene" id="scene">
+
+    <header class="masthead">
+      <h1 class="brand">Design Toolmap</h1>
+      <h2 class="ask" id="ask">Which stage are you at?</h2>
+      <p class="summary" id="summary" aria-live="polite"></p>
+    </header>
+
+    <!--
+      Each object sits on the desk with:
+        --dx / --dy : position on a wide screen, in % of the desk
+        --mx / --my : position on a phone
+        --w         : width, in desk units (bigger number = bigger object)
+        --r         : tilt
+      Change these numbers to rearrange the desk.
+    -->
+    <div class="desk">
+
+      <!-- Decoration (not clickable) -->
+
+      <div class="item deco" style="--dx:8%; --dy:97%; --mx:34%; --my:99%; --w:34; --r:-4deg" aria-hidden="true">
+        <svg class="art" viewBox="0 0 440 170" focusable="false">
+          <ellipse cx="236" cy="152" rx="196" ry="15" fill="url(#shadow)"/>
+          <g filter="url(#clay-big)"><rect x="12" y="12" width="416" height="136" rx="26" class="f-black"/></g>
+          <g filter="url(#clay)" fill="none" stroke-width="21" stroke-linecap="round" class="s-white">
+            <line x1="46" y1="44" x2="398" y2="44" stroke-dasharray="0 32"/>
+            <line x1="46" y1="74" x2="398" y2="74" stroke-dasharray="0 32"/>
+            <line x1="46" y1="104" x2="398" y2="104" stroke-dasharray="0 32"/>
+            <line x1="46" y1="130" x2="78" y2="130" stroke-dasharray="0 32"/>
+            <line x1="120" y1="130" x2="320" y2="130"/>
+            <line x1="366" y1="130" x2="398" y2="130" stroke-dasharray="0 32"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:27%; --dy:90%; --mx:80%; --my:93%; --w:8; --r:14deg" aria-hidden="true" data-hide-small>
+        <svg class="art" viewBox="0 0 120 190" focusable="false">
+          <ellipse cx="68" cy="176" rx="46" ry="10" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><path class="f-white" d="M60 10 C96 10 112 42 112 84 C112 134 92 172 60 172 C28 172 8 134 8 84 C8 42 24 10 60 10 Z"/></g>
+          <g filter="url(#clay)" fill="none" stroke-width="5" stroke-linecap="round" class="s-gray"><path d="M14 78 H106 M60 16 V78"/></g>
+          <g filter="url(#clay)"><rect x="52" y="34" width="16" height="28" rx="8" class="f-black"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:92%; --dy:15%; --mx:84%; --my:10%; --w:12; --r:0deg" aria-hidden="true">
+        <svg class="art" viewBox="0 0 200 200" focusable="false">
+          <ellipse cx="98" cy="178" rx="76" ry="12" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><circle cx="168" cy="100" r="20" fill="none" stroke-width="14" class="s-black"/></g>
+          <g filter="url(#clay)"><circle cx="90" cy="100" r="68" class="f-black"/></g>
+          <g filter="url(#clay)"><circle cx="90" cy="100" r="48" class="f-gray"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:16%; --dy:25%; --mx:16%; --my:86%; --w:11; --r:0deg" aria-hidden="true">
+        <svg class="art" viewBox="0 0 200 200" focusable="false">
+          <ellipse cx="104" cy="178" rx="74" ry="12" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><rect x="34" y="40" width="120" height="120" rx="10" class="f-white" transform="rotate(-6 94 100)"/></g>
+          <g filter="url(#clay)"><rect x="52" y="50" width="120" height="120" rx="10" class="f-lime" transform="rotate(7 112 110)"/></g>
+          <g filter="url(#clay)"><path d="M78 88 H140 M78 112 H130 M78 136 H114" fill="none" stroke-width="8" stroke-linecap="round" class="s-black" transform="rotate(7 112 110)"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:57%; --dy:92%; --mx:50%; --my:99%; --w:30; --r:-2deg" aria-hidden="true" data-hide-small>
+        <svg class="art" viewBox="0 0 640 90" focusable="false">
+          <ellipse cx="334" cy="80" rx="300" ry="8" fill="url(#shadow)"/>
+          <g filter="url(#clay-big)"><rect x="16" y="10" width="608" height="60" rx="14" class="f-white"/></g>
+          <g filter="url(#clay)">
+            <rect x="16" y="10" width="608" height="60" fill="none"/>
+            <line x1="46" y1="26" x2="594" y2="26" stroke-width="30" stroke-dasharray="7 19" class="s-black"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:36%; --dy:31%; --mx:84%; --my:24%; --w:8; --r:-9deg" aria-hidden="true">
+        <svg class="art" viewBox="0 0 200 240" focusable="false">
+          <ellipse cx="106" cy="222" rx="68" ry="11" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><rect x="24" y="14" width="152" height="204" rx="16" class="f-black"/></g>
+          <g filter="url(#clay)"><rect x="134" y="14" width="16" height="204" class="f-lime"/></g>
+          <g filter="url(#clay)"><rect x="50" y="48" width="64" height="44" rx="8" class="f-white"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:79%; --dy:28%; --mx:20%; --my:10%; --w:9; --r:0deg" aria-hidden="true">
+        <svg class="art" viewBox="0 0 200 200" focusable="false">
+          <ellipse cx="104" cy="178" rx="70" ry="12" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><path class="f-white" fill-rule="evenodd" d="M30 100 a70 70 0 1 0 140 0 a70 70 0 1 0 -140 0 Z M64 100 a36 36 0 1 0 72 0 a36 36 0 1 0 -72 0 Z"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:43%; --dy:90%; --mx:90%; --my:70%; --w:7; --r:-18deg" aria-hidden="true" data-hide-small>
+        <svg class="art" viewBox="0 0 120 90" focusable="false">
+          <ellipse cx="62" cy="80" rx="48" ry="7" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><rect x="10" y="12" width="100" height="56" rx="16" class="f-white"/></g>
+          <g filter="url(#clay)"><path class="f-black" d="M60 12 H94 Q110 12 110 28 V52 Q110 68 94 68 H60 Z"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:5%; --dy:37%; --mx:90%; --my:30%; --w:4.5; --r:12deg" aria-hidden="true">
+        <svg class="art" viewBox="-50 -50 100 110" focusable="false">
+          <ellipse cx="4" cy="52" rx="30" ry="5" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><path class="f-lime" d="M0 -44 C5 -12 12 -5 44 0 C12 5 5 12 0 44 C-5 12 -12 5 -44 0 C-12 -5 -5 -12 0 -44 Z"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:59%; --dy:28%; --mx:8%; --my:62%; --w:3.2; --r:-10deg" aria-hidden="true">
+        <svg class="art" viewBox="-50 -50 100 110" focusable="false">
+          <ellipse cx="4" cy="52" rx="30" ry="5" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><path class="f-black" d="M0 -44 C5 -12 12 -5 44 0 C12 5 5 12 0 44 C-5 12 -12 5 -44 0 C-12 -5 -5 -12 0 -44 Z"/></g>
+        </svg>
+      </div>
+
+      <div class="item deco" style="--dx:96%; --dy:84%; --mx:92%; --my:50%; --w:4.5; --r:8deg" aria-hidden="true" data-hide-small>
+        <svg class="art" viewBox="-50 -50 100 110" focusable="false">
+          <ellipse cx="4" cy="52" rx="30" ry="5" fill="url(#shadow)"/>
+          <g filter="url(#clay)"><path class="f-white" d="M0 -44 C5 -12 12 -5 44 0 C12 5 5 12 0 44 C-5 12 -12 5 -44 0 C-12 -5 -5 -12 0 -44 Z"/></g>
+        </svg>
+      </div>
+
+      <!-- The five stages. These are the buttons. -->
+
+      <button class="item stage-btn" type="button" data-stage="explore" style="--i:0; --dx:15%; --dy:55%; --mx:28%; --my:27%; --w:15; --r:-5deg">
+        <span class="art-wrap">
+          <svg class="art" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+            <ellipse cx="108" cy="180" rx="72" ry="13" fill="url(#shadow)"/>
+            <g filter="url(#clay)"><line x1="126" y1="126" x2="172" y2="172" stroke-linecap="round" stroke-width="30" class="s-black"/></g>
+            <g filter="url(#clay)"><circle cx="82" cy="82" r="44" class="f-white"/></g>
+            <g filter="url(#clay)"><circle cx="82" cy="82" r="52" fill="none" stroke-width="24" class="s-purple"/></g>
+          </svg>
+        </span>
+        <span class="stage-label"><b>01</b> Explore</span>
+      </button>
+
+      <button class="item stage-btn" type="button" data-stage="define" style="--i:1; --dx:33%; --dy:68%; --mx:70%; --my:39%; --w:15; --r:6deg">
+        <span class="art-wrap">
+          <svg class="art" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+            <ellipse cx="104" cy="178" rx="80" ry="13" fill="url(#shadow)"/>
+            <g filter="url(#clay)"><path class="f-purple" fill-rule="evenodd" d="M104 24 C152 22 184 54 180 100 C177 136 148 142 128 148 C108 154 116 176 90 176 C44 176 14 142 18 98 C22 54 58 26 104 24 Z M54 128 a14 14 0 1 0 28 0 a14 14 0 1 0 -28 0 Z"/></g>
+            <g filter="url(#clay)">
+              <circle cx="62" cy="68" r="15" class="f-lime"/>
+              <circle cx="104" cy="52" r="15" class="f-white"/>
+              <circle cx="146" cy="72" r="15" class="f-black"/>
+              <circle cx="150" cy="114" r="15" class="f-gray"/>
+            </g>
+          </svg>
+        </span>
+        <span class="stage-label"><b>02</b> Define</span>
+      </button>
+
+      <button class="item stage-btn" type="button" data-stage="source" style="--i:2; --dx:51%; --dy:50%; --mx:28%; --my:53%; --w:15; --r:-3deg">
+        <span class="art-wrap">
+          <svg class="art" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+            <ellipse cx="104" cy="180" rx="80" ry="12" fill="url(#shadow)"/>
+            <g filter="url(#clay)"><rect x="22" y="30" width="156" height="140" rx="26" class="f-purple"/></g>
+            <g filter="url(#clay)"><rect x="46" y="54" width="108" height="92" rx="12" class="f-white"/></g>
+            <g filter="url(#clay)">
+              <circle cx="124" cy="80" r="14" class="f-lime"/>
+              <path d="M54 138 L86 94 L108 122 L124 104 L146 138 Z" class="fs-black" stroke-width="6" stroke-linejoin="round"/>
+            </g>
+          </svg>
+        </span>
+        <span class="stage-label"><b>03</b> Source</span>
+      </button>
+
+      <button class="item stage-btn" type="button" data-stage="make" style="--i:3; --dx:69%; --dy:68%; --mx:70%; --my:65%; --w:17; --r:2deg">
+        <span class="art-wrap">
+          <svg class="art" viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+            <ellipse cx="128" cy="180" rx="86" ry="12" fill="url(#shadow)"/>
+            <g filter="url(#clay)"><polygon points="62,78 22,100 62,122" class="fs-white" stroke-width="6" stroke-linejoin="round" transform="rotate(-35 120 100)"/></g>
+            <g filter="url(#clay)"><polygon points="22,100 38,91 38,109" class="fs-black" stroke-width="6" stroke-linejoin="round" transform="rotate(-35 120 100)"/></g>
+            <g filter="url(#clay)"><rect x="62" y="78" width="104" height="44" rx="10" class="f-purple" transform="rotate(-35 120 100)"/></g>
+            <g filter="url(#clay)"><rect x="166" y="78" width="22" height="44" class="f-gray" transform="rotate(-35 120 100)"/></g>
+            <g filter="url(#clay)"><rect x="188" y="80" width="32" height="40" rx="14" class="f-lime" transform="rotate(-35 120 100)"/></g>
+          </svg>
+        </span>
+        <span class="stage-label"><b>04</b> Make</span>
+      </button>
+
+      <button class="item stage-btn" type="button" data-stage="present" style="--i:4; --dx:86%; --dy:53%; --mx:30%; --my:80%; --w:15; --r:4deg">
+        <span class="art-wrap">
+          <svg class="art" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+            <ellipse cx="104" cy="180" rx="72" ry="12" fill="url(#shadow)"/>
+            <g filter="url(#clay)"><path class="f-purple" d="M52 26 H148 Q176 26 176 54 V112 Q176 140 148 140 H112 L74 176 V140 H52 Q24 140 24 112 V54 Q24 26 52 26 Z"/></g>
+            <g filter="url(#clay)">
+              <circle cx="66" cy="84" r="12" class="f-white"/>
+              <circle cx="100" cy="84" r="12" class="f-lime"/>
+              <circle cx="134" cy="84" r="12" class="f-white"/>
+            </g>
+          </svg>
+        </span>
+        <span class="stage-label"><b>05</b> Present</span>
+      </button>
+
+    </div>
+
+    <p class="message" id="message" role="status"></p>
+    <noscript><p class="message">This page needs JavaScript to show the tools.</p></noscript>
+
+    <footer class="credits">
+      <p>
+        Inspired by
+        <a href="https://github.com/goabstract/Awesome-Design-Tools" target="_blank" rel="noopener noreferrer">Awesome Design Tools</a> (MIT)
+        &middot;
+        <a href="https://github.com/andang116-design/design-toolmap" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+      </p>
+    </footer>
+  </main>
+
+  <!-- ===== Stage panel: opens when you click an object ===== -->
+  <dialog class="panel" id="panel" aria-labelledby="panel-title">
+    <div class="panel-inner">
+      <header class="panel-head">
+        <div>
+          <p class="panel-kicker" id="panel-kicker"></p>
+          <h2 class="panel-title" id="panel-title" tabindex="-1"></h2>
+          <p class="panel-hint" id="panel-hint"></p>
+        </div>
+        <button class="panel-close" type="button" id="panel-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M5 5 L19 19 M19 5 L5 19" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+      <div class="panel-body" id="panel-body"></div>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
